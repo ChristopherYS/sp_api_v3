@@ -158,66 +158,60 @@
         }
       };
 
-      async function getRegistrarById(event) {
-        event.preventDefault();
+      async function getRegistrarById() {
         const registrarId = document.getElementById("registrarSelect").value;
         const errorAlert = document.getElementById("errorAlert");
-        const resultDiv = document.getElementById("result");
+        const tableBody = document.getElementById("registrarTableBody");
 
         if (!registrarId) {
           errorAlert.textContent = "Please select a registrar.";
           errorAlert.style.display = "block";
-          resultDiv.innerHTML = "";
+          tableBody.innerHTML = "";
           return;
         }
 
         try {
           const response = await fetch(
-            `${config.getBaseUrl()}/registrar/getbyid`,
+            `${config.getBaseUrl()}/registrar/${registrarId}`,
             {
-              method: "POST",
+              method: "GET",
               credentials: "include",
               headers: {
                 Accept: "application/json",
-                "Content-Type": "application/json",
               },
-              body: JSON.stringify({ id: registrarId }),
             }
           );
 
-          let data;
-          let responseText = await response.text();
-          try {
-            data = JSON.parse(responseText);
-          } catch {
-            data = { error: responseText };
+          if (response.status === 404) {
+            errorAlert.textContent = "Registrar not found.";
+            errorAlert.style.display = "block";
+            tableBody.innerHTML = "";
+            return;
           }
 
-          if (response.ok) {
-            errorAlert.style.display = "none";
-            resultDiv.innerHTML = `
-              <div class="card">
-                <div class="card-body">
-                  <h5 class="card-title">${data.name}</h5>
-                  <p class="card-text"><strong>School ID:</strong> ${data.school_id}</p>
-                  <p class="card-text"><strong>Username:</strong> ${data.username}</p>
-                </div>
-              </div>
-            `;
-          } else {
-            const errorMessage =
-              data.message ||
-              data.error ||
-              `Server returned ${response.status}: ${response.statusText}`;
-            errorAlert.textContent = errorMessage;
-            errorAlert.style.display = "block";
-            resultDiv.innerHTML = "";
+          if (!response.ok) {
+            throw new Error(`Failed to get registrar: ${response.status} ${response.statusText}`);
           }
+
+          const data = await response.json();
+
+          // Display registrar information in the table
+          tableBody.innerHTML = `
+            <tr>
+              <td>${data.id ?? ''}</td>
+              <td>${data.school_id ?? ''}</td>
+              <td>${data.name ?? ''}</td>
+              <td>${data.address ?? ''}</td>
+              <td>${data.email_address ?? ''}</td>
+              <td>${data.position ?? ''}</td>
+            </tr>
+          `;
+          errorAlert.style.display = "none";
         } catch (error) {
           errorAlert.textContent =
             error.message || "Failed to get registrar details. Please try again.";
           errorAlert.style.display = "block";
-          resultDiv.innerHTML = "";
+          tableBody.innerHTML = "";
         }
       }
     </script>
