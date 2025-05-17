@@ -53,7 +53,8 @@ export const getAllSubjects = async () => {
 export const getSubjectById = async (id) => {
   const db = await initializeDatabase();
   try {
-    const subject = await db.get("SELECT * FROM subject WHERE id = ?", [id]);
+    const stmt = db.prepare("SELECT * FROM subject WHERE id = ?");
+    const subject = stmt.get(id);
     return subject;
   } finally {
     await db.close();
