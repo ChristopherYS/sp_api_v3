@@ -113,33 +113,14 @@
 
       // Load subjects into select dropdown when page loads
       window.onload = async function () {
-        try {
-          console.log("Fetching API key...");
-          const apiKeyResponse = await fetch(
-            `${config.getBaseUrl()}/get-api-key`,
-            {
-              method: "GET",
-              credentials: "include",
-              headers: {
-                Accept: "application/json",
-              },
-            }
-          );
-          if (!apiKeyResponse.ok) {
-            throw new Error(
-              `Failed to get API key: ${apiKeyResponse.status} ${apiKeyResponse.statusText}`
-            );
-          }
-          const { apiKey } = await apiKeyResponse.json();
-          console.log("Got API key successfully");
 
+        try {
           console.log("Fetching all subjects for dropdown...");
           const response = await fetch(`${config.getBaseUrl()}/subject/allsub`, {
             method: "GET",
             credentials: "include",
             headers: {
               Accept: "application/json",
-              "x-api-key": apiKey,
             },
           });
 
@@ -173,54 +154,59 @@
         }
       };
 
-      async function getSubjectById(event) {
-        event.preventDefault();
+      async function getSubjectById() {
         const errorAlert = document.getElementById("errorAlert");
-        const successAlert = document.getElementById("successAlert");
-        const resultDiv = document.getElementById("result");
+        const tableBody = document.getElementById("subjectTableBody");
+        // Get selected subject ID from dropdown
+        const subjectId = document.getElementById("subjectSelect").value;
 
-        const subjectCode = document.getElementById("subjectCode").value;
+        if (!subjectId) {
+          errorAlert.textContent = "Please select a subject.";
+          errorAlert.style.display = "block";
+          tableBody.innerHTML = "";
+          return;
+        }
 
         try {
-          const response = await fetch(`${config.getBaseUrl()}/subject/getbyid`, {
-            method: "POST",
+          const response = await fetch(`${config.getBaseUrl()}/subject/${subjectId}`, {
+            method: "GET",
             credentials: "include",
             headers: {
-              "Content-Type": "application/json",
               Accept: "application/json",
             },
-            body: JSON.stringify({ subject_code: subjectCode }),
           });
+
+          if (response.status === 404) {
+            errorAlert.textContent = "Subject not found.";
+            errorAlert.style.display = "block";
+            tableBody.innerHTML = "";
+            return;
+          }
 
           if (!response.ok) {
             throw new Error(`Failed to get subject: ${response.status} ${response.statusText}`);
           }
 
           const data = await response.json();
-          
-          // Display subject information
-          resultDiv.innerHTML = `
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title">Subject Information</h5>
-                <p><strong>Subject Code:</strong> ${data.subject_code}</p>
-                <p><strong>Subject Name:</strong> ${data.subject_name}</p>
-                <p><strong>Units:</strong> ${data.subject_units}</p>
-                <p><strong>Course:</strong> ${data.subject_course}</p>
-                <p><strong>Year Level:</strong> ${data.subject_studentyear}</p>
-                <p><strong>Semester:</strong> ${data.subject_studentsemester}</p>
-              </div>
-            </div>
+
+          // Display subject information in the table
+          tableBody.innerHTML = `
+            <tr>
+              <td>${data.id ?? ''}</td>
+              <td>${data.subject_code ?? ''}</td>
+              <td>${data.subject_name ?? ''}</td>
+              <td>${data.subject_units ?? ''}</td>
+              <td>${data.subject_course ?? ''}</td>
+              <td>${data.subject_studentyear ?? ''}</td>
+              <td>${data.subject_studentsemester ?? ''}</td>
+            </tr>
           `;
-          
-          successAlert.style.display = "block";
           errorAlert.style.display = "none";
         } catch (error) {
           console.error("Error getting subject:", error);
           errorAlert.textContent = `Failed to get subject: ${error.message}`;
           errorAlert.style.display = "block";
-          successAlert.style.display = "none";
-          resultDiv.innerHTML = "";
+          tableBody.innerHTML = "";
         }
       }
     </script>
