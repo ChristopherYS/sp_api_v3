@@ -1,15 +1,11 @@
 // db/database.js
 
-import { open } from "sqlite";
 import Database from "better-sqlite3";
 
 // Database connection initialization function
 const initializeDatabase = async () => {
   try {
-    const db = await open({
-      filename: "./student_profile.db",
-      driver: Database
-    });
+    const db = new Database("./student_profile.db", { verbose: console.log });
     console.log("Database connected successfully");
     return db;
   } catch (error) {

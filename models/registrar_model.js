@@ -14,22 +14,22 @@ export const createRegistrar = async (registrarData) => {
       username,
       password,
     } = registrarData;
-    const hashedPassword = await bcrypt.hash(password, 12); // Hash the password
-    const result = await db.run(
-      "INSERT INTO registrar (school_id, name, address, email_address, position, username, password) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      [
-        school_id,
-        name,
-        address,
-        email_address,
-        position,
-        username,
-        hashedPassword,
-      ]
+    const hashedPassword = await bcrypt.hash(password, 12);
+    const stmt = db.prepare(
+      "INSERT INTO registrar (school_id, name, address, email_address, position, username, password) VALUES (?, ?, ?, ?, ?, ?, ?)"
+    );
+    const result = stmt.run(
+      school_id,
+      name,
+      address,
+      email_address,
+      position,
+      username,
+      hashedPassword
     );
     return result;
   } finally {
-    await db.close();
+    db.close();
   }
 };
 
@@ -37,10 +37,11 @@ export const createRegistrar = async (registrarData) => {
 export const getAllRegistrars = async () => {
   const db = await initializeDatabase();
   try {
-    const registrars = await db.all("SELECT * FROM registrar");
+    const stmt = db.prepare("SELECT * FROM registrar");
+    const registrars = stmt.all();
     return registrars;
   } finally {
-    await db.close();
+    db.close();
   }
 };
 
@@ -48,13 +49,11 @@ export const getAllRegistrars = async () => {
 export const findRegistrarByUsername = async (username) => {
   const db = await initializeDatabase();
   try {
-    const registrar = await db.get(
-      "SELECT * FROM registrar WHERE username = ?",
-      [username]
-    );
+    const stmt = db.prepare("SELECT * FROM registrar WHERE username = ?");
+    const registrar = stmt.get(username);
     return registrar;
   } finally {
-    await db.close();
+    db.close();
   }
 };
 
@@ -63,13 +62,13 @@ export const updateRegistrar = async (id, updatedFields) => {
   const db = await initializeDatabase();
   try {
     const { school_id, name, address, email_address, position } = updatedFields;
-    const result = await db.run(
-      "UPDATE registrar SET school_id = ?, name = ?, address = ?, email_address = ?, position = ? WHERE id = ?",
-      [school_id, name, address, email_address, position, id]
+    const stmt = db.prepare(
+      "UPDATE registrar SET school_id = ?, name = ?, address = ?, email_address = ?, position = ? WHERE id = ?"
     );
+    const result = stmt.run(school_id, name, address, email_address, position, id);
     return result;
   } finally {
-    await db.close();
+    db.close();
   }
 };
 
@@ -77,13 +76,11 @@ export const updateRegistrar = async (id, updatedFields) => {
 export const updateRegistrarUsername = async (id, newUsername) => {
   const db = await initializeDatabase();
   try {
-    const result = await db.run(
-      "UPDATE registrar SET username = ? WHERE id = ?",
-      [newUsername, id]
-    );
+    const stmt = db.prepare("UPDATE registrar SET username = ? WHERE id = ?");
+    const result = stmt.run(newUsername, id);
     return result;
   } finally {
-    await db.close();
+    db.close();
   }
 };
 
@@ -91,14 +88,12 @@ export const updateRegistrarUsername = async (id, newUsername) => {
 export const updateRegistrarPassword = async (id, newPassword) => {
   const db = await initializeDatabase();
   try {
-    const hashedPassword = await bcrypt.hash(newPassword, 12); // Hash the new password
-    const result = await db.run(
-      "UPDATE registrar SET password = ? WHERE id = ?",
-      [hashedPassword, id]
-    );
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+    const stmt = db.prepare("UPDATE registrar SET password = ? WHERE id = ?");
+    const result = stmt.run(hashedPassword, id);
     return result;
   } finally {
-    await db.close();
+    db.close();
   }
 };
 
@@ -106,22 +101,22 @@ export const updateRegistrarPassword = async (id, newPassword) => {
 export const getRegistrarById = async (id) => {
   const db = await initializeDatabase();
   try {
-    const registrar = await db.get("SELECT * FROM registrar WHERE id = ?", [
-      id,
-    ]);
+    const stmt = db.prepare("SELECT * FROM registrar WHERE id = ?");
+    const registrar = stmt.get(id);
     return registrar;
   } finally {
-    await db.close();
+    db.close();
   }
 };
 
-// Delete a student
+// Delete a registrar
 export const deleteRegistrar = async (id) => {
   const db = await initializeDatabase();
   try {
-    const result = await db.run("DELETE FROM registrar WHERE id = ?", [id]);
+    const stmt = db.prepare("DELETE FROM registrar WHERE id = ?");
+    const result = stmt.run(id);
     return result;
   } finally {
-    await db.close();
+    db.close();
   }
 };
