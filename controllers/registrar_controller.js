@@ -1,6 +1,6 @@
 // controllers/registrar_controller.js
 import * as RegistrarModel from "../models/registrar_model.js";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 // Registrar login
 export const registrarLogin = async (req, res) => {

@@ -1,5 +1,5 @@
 import initializeDatabase from "../db/database.js";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 // Create a new registrar
 export const createRegistrar = async (registrarData) => {

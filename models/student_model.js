@@ -1,7 +1,7 @@
 // models/student_model.js
 
 import initializeDatabase from "../db/database.js";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 // Create a new student
 export const createStudent = async (studentData) => {
