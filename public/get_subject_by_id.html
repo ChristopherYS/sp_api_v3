@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Get Subject by ID</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.datatables.net/2.3.1/css/dataTables.dataTables.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      .container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      .button-container {
+        margin-bottom: 2rem;
+        display: flex;
+        gap: 1rem;
+      }
+      .table-container {
+        margin-top: 2rem;
+      }
+      .alert {
+        display: none;
+        margin-top: 1rem;
+      }
+      .select-container {
+        margin-bottom: 2rem;
+      }
+      .select2-container {
+        width: 100% !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <br />
+      <h2 class="text-center mb-4">Get Subject by ID</h2>
+
+      <div class="select-container">
+        <label for="subjectSelect" class="form-label">Select Subject:</label>
+        <select class="form-select" id="subjectSelect">
+          <option value="">Choose a subject...</option>
+        </select>
+      </div>
+
+      <div class="button-container">
+        <button class="btn btn-primary" onclick="getSubjectById()">
+          Get Subject Info
+        </button>
+        <a href="index.html" class="btn btn-secondary">Back To Home</a>
+      </div>
+
+      <div id="errorAlert" class="alert alert-danger" role="alert">
+        Failed to fetch subject information. Please try again.
+      </div>
+
+      <div class="table-container">
+        <table id="myTable" class="table table-striped table-hover">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Subject Code</th>
+              <th>Subject Name</th>
+              <th>Units</th>
+              <th>Course</th>
+              <th>Year Level</th>
+              <th>Semester</th>
+            </tr>
+          </thead>
+          <tbody id="subjectTableBody">
+            <!-- populated data -->
+          </tbody>
+        </table>
+      </div>
+      <br />
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/2.3.1/js/dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="config.js"></script>
+    <script>
+      let table;
+
+      // Initialize Select2
+      $(document).ready(function () {
+        $("#subjectSelect").select2({
+          theme: "bootstrap-5",
+          placeholder: "Search for a subject...",
+          allowClear: true,
+          width: "100%",
+        });
+      });
+
+      // Load subjects into select dropdown when page loads
+      window.onload = async function () {
+        try {
+          console.log("Fetching API key...");
+          const apiKeyResponse = await fetch(
+            `${config.getBaseUrl()}/get-api-key`,
+            {
+              method: "GET",
+              credentials: "include",
+              headers: {
+                Accept: "application/json",
+              },
+            }
+          );
+          if (!apiKeyResponse.ok) {
+            throw new Error(
+              `Failed to get API key: ${apiKeyResponse.status} ${apiKeyResponse.statusText}`
+            );
+          }
+          const { apiKey } = await apiKeyResponse.json();
+          console.log("Got API key successfully");
+
+          console.log("Fetching all subjects for dropdown...");
+          const response = await fetch(`${config.getBaseUrl()}/subject/allsub`, {
+            method: "GET",
+            credentials: "include",
+            headers: {
+              Accept: "application/json",
+              "x-api-key": apiKey,
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error(
+              `Failed to fetch subjects: ${response.status} ${response.statusText}`
+            );
+          }
+
+          const subjects = await response.json();
+          const select = document.getElementById("subjectSelect");
+
+          // Sort subjects by name
+          subjects.sort((a, b) => a.subject_name.localeCompare(b.subject_name));
+
+          subjects.forEach((subject) => {
+            const option = document.createElement("option");
+            option.value = subject.id;
+            option.textContent = `${subject.subject_code} - ${subject.subject_name}`;
+            select.appendChild(option);
+          });
+
+          // Refresh Select2 to show the new options
+          $("#subjectSelect").trigger("change");
+        } catch (error) {
+          console.error("Error loading subjects:", error);
+          const errorAlert = document.getElementById("errorAlert");
+          errorAlert.textContent =
+            "Failed to load subject list. Please refresh the page.";
+          errorAlert.style.display = "block";
+        }
+      };
+
+      async function getSubjectById(event) {
+        event.preventDefault();
+        const errorAlert = document.getElementById("errorAlert");
+        const successAlert = document.getElementById("successAlert");
+        const resultDiv = document.getElementById("result");
+
+        const subjectCode = document.getElementById("subjectCode").value;
+
+        try {
+          const response = await fetch(`${config.getBaseUrl()}/subject/getbyid`, {
+            method: "POST",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify({ subject_code: subjectCode }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`Failed to get subject: ${response.status} ${response.statusText}`);
+          }
+
+          const data = await response.json();
+          
+          // Display subject information
+          resultDiv.innerHTML = `
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Subject Information</h5>
+                <p><strong>Subject Code:</strong> ${data.subject_code}</p>
+                <p><strong>Subject Name:</strong> ${data.subject_name}</p>
+                <p><strong>Units:</strong> ${data.subject_units}</p>
+                <p><strong>Course:</strong> ${data.subject_course}</p>
+                <p><strong>Year Level:</strong> ${data.subject_studentyear}</p>
+                <p><strong>Semester:</strong> ${data.subject_studentsemester}</p>
+              </div>
+            </div>
+          `;
+          
+          successAlert.style.display = "block";
+          errorAlert.style.display = "none";
+        } catch (error) {
+          console.error("Error getting subject:", error);
+          errorAlert.textContent = `Failed to get subject: ${error.message}`;
+          errorAlert.style.display = "block";
+          successAlert.style.display = "none";
+          resultDiv.innerHTML = "";
+        }
+      }
+    </script>
+  </body>
+</html>

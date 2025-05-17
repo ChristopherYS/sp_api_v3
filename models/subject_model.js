@@ -1,0 +1,177 @@
+// models/subject_model.js
+
+import initializeDatabase from "../db/database.js";
+
+// Create a new subject
+export const createSubject = async (subjectData) => {
+  const db = await initializeDatabase();
+  try {
+    const {
+      subject_code,
+      subject_name,
+      subject_units,
+      subject_course,
+      subject_studentyear,
+      subject_studentsemester,
+    } = subjectData;
+    const result = await db.run(
+      "INSERT INTO subject (subject_code, subject_name, subject_units, subject_course, subject_studentyear, subject_studentsemester) VALUES (?, ?, ?, ?, ?, ?)",
+      [
+        subject_code,
+        subject_name,
+        subject_units,
+        subject_course,
+        subject_studentyear,
+        subject_studentsemester,
+      ]
+    );
+
+    // Get the created subject
+    const createdSubject = await db.get("SELECT * FROM subject WHERE id = ?", [
+      result.lastID,
+    ]);
+
+    return createdSubject;
+  } finally {
+    await db.close();
+  }
+};
+
+// Get all subjects
+export const getAllSubjects = async () => {
+  const db = await initializeDatabase();
+  try {
+    const subjects = await db.all("SELECT * FROM subject");
+    return subjects;
+  } finally {
+    await db.close();
+  }
+};
+
+// Get a subject by ID
+export const getSubjectById = async (id) => {
+  const db = await initializeDatabase();
+  try {
+    const subject = await db.get("SELECT * FROM subject WHERE id = ?", [id]);
+    return subject;
+  } finally {
+    await db.close();
+  }
+};
+
+// Update subject information
+export const updateSubject = async (id, subjectData) => {
+  const db = await initializeDatabase();
+  try {
+    const {
+      subject_code,
+      subject_name,
+      subject_units,
+      subject_course,
+      subject_studentyear,
+      subject_studentsemester,
+    } = subjectData;
+    const result = await db.run(
+      "UPDATE subject SET subject_code = ?, subject_name = ?, subject_units = ?, subject_course = ?, subject_studentyear = ?, subject_studentsemester = ? WHERE id = ?",
+      [
+        subject_code,
+        subject_name,
+        subject_units,
+        subject_course,
+        subject_studentyear,
+        subject_studentsemester,
+        id,
+      ]
+    );
+    return result;
+  } finally {
+    await db.close();
+  }
+};
+
+// Delete a subject
+export const deleteSubject = async (id) => {
+  const db = await initializeDatabase();
+  try {
+    const result = await db.run("DELETE FROM subject WHERE id = ?", [id]);
+    return result;
+  } finally {
+    await db.close();
+  }
+};
+
+// Add student grades
+export const addStudentGrade = async (
+  student_id,
+  subject_id,
+  subject_grades
+) => {
+  const db = await initializeDatabase();
+  try {
+    const result = await db.run(
+      "INSERT INTO student_subject_grades (student_id, subject_id, subject_grades) VALUES (?, ?, ?)",
+      [student_id, subject_id, subject_grades]
+    );
+    return result;
+  } finally {
+    await db.close();
+  }
+};
+
+// Update student grades
+export const updateStudentGrade = async (
+  subject_grades,
+  student_id,
+  subject_id
+) => {
+  const db = await initializeDatabase();
+  try {
+    const result = await db.run(
+      "UPDATE student_subject_grades SET subject_grades = ? WHERE student_id = ? AND subject_id = ?",
+      [subject_grades, student_id, subject_id]
+    );
+    console.log(
+      "Executing SQL Query:",
+      "UPDATE student_subject_grades SET subject_grades = ? WHERE student_id = ? AND subject_id = ?",
+      [subject_grades, student_id, subject_id]
+    );
+    console.log("Parameters:", { subject_grades, student_id, subject_id });
+    console.log("Result:", result);
+    if (result.changes === 0) {
+      throw new Error(
+        "No rows updated. Ensure the student_id and subject_id exist."
+      );
+    }
+    return result;
+  } finally {
+    await db.close();
+  }
+};
+
+// Delete student grades
+export const deleteStudentGrade = async (student_id, subject_id) => {
+  const db = await initializeDatabase();
+  try {
+    const result = await db.run(
+      "DELETE FROM student_subject_grades WHERE student_id = ? AND subject_id = ?",
+      [student_id, subject_id]
+    );
+    return result;
+  } finally {
+    await db.close();
+  }
+};
+
+// View student grades
+export const getStudentGrades = async (studentId) => {
+  const db = await initializeDatabase();
+  try {
+    const grades = await db.all(
+      'SELECT s.id, s.subject_studentyear AS "Year Level", s.subject_studentsemester AS "Semester", s.subject_code AS "Subject Code", s.subject_name AS "Subject Name", s.subject_units AS "Subject Units", g.subject_grades AS "Subject Grades" FROM student_subject_grades g INNER JOIN subject s ON g.subject_id = s.id WHERE g.student_id = ?',
+      [studentId]
+    );
+    return grades;
+  } finally {
+    await db.close();
+  }
+};
