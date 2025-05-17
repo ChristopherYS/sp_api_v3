@@ -41,7 +41,8 @@ export const createSubject = async (subjectData) => {
 export const getAllSubjects = async () => {
   const db = await initializeDatabase();
   try {
-    const subjects = await db.all("SELECT * FROM subject");
+    const stmt = db.prepare("SELECT * FROM subject");
+    const subjects = stmt.all();
     return subjects;
   } finally {
     await db.close();
