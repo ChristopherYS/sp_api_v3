@@ -156,12 +156,18 @@
       };
 
       async function getStudentById(event) {
-        event.preventDefault();
+        if (event) event.preventDefault();
         const errorAlert = document.getElementById("errorAlert");
-        const successAlert = document.getElementById("successAlert");
         const resultDiv = document.getElementById("result");
+        // Get selected student ID from dropdown
+        const studentId = document.getElementById("studentSelect").value;
 
-        const schoolId = document.getElementById("schoolId").value;
+        if (!studentId) {
+          errorAlert.textContent = "Please select a student.";
+          errorAlert.style.display = "block";
+          resultDiv.innerHTML = "";
+          return;
+        }
 
         try {
           const response = await fetch(`${config.getBaseUrl()}/student/getbyid`, {
@@ -171,7 +177,7 @@
               "Content-Type": "application/json",
               Accept: "application/json",
             },
-            body: JSON.stringify({ school_id: schoolId }),
+            body: JSON.stringify({ id: studentId }),
           });
 
           if (!response.ok) {
@@ -179,7 +185,7 @@
           }
 
           const data = await response.json();
-          
+
           // Display student information
           resultDiv.innerHTML = `
             <div class="card">
@@ -193,14 +199,11 @@
               </div>
             </div>
           `;
-          
-          successAlert.style.display = "block";
           errorAlert.style.display = "none";
         } catch (error) {
           console.error("Error getting student:", error);
           errorAlert.textContent = `Failed to get student: ${error.message}`;
           errorAlert.style.display = "block";
-          successAlert.style.display = "none";
           resultDiv.innerHTML = "";
         }
       }
