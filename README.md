@@ -24,9 +24,6 @@ A RESTful API for managing student profiles, subjects, grades, and registrar inf
 
 ## API Endpoints
 
-### Authentication & API Key
-- `GET /get-api-key` — Retrieve the API key (for frontend use)
-
 ### Registrar Endpoints
 - `POST   /registrar/login` — Registrar login
 - `POST   /registrar/newreg` — Create new registrar
