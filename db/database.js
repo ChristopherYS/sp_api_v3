@@ -1,13 +1,14 @@
 // db/database.js
 
 import { open } from "sqlite";
+import sqlite3 from "sqlite3";
 
 // Database connection initialization function
 const initializeDatabase = async () => {
   try {
     const db = await open({
       filename: "./student_profile.db",
-      driver: null // sqlite package will use its default driver
+      driver: sqlite3.Database
     });
     console.log("Database connected successfully");
     return db;
