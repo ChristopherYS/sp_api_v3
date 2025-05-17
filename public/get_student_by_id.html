@@ -113,25 +113,6 @@
       // Load students into select dropdown when page loads
       window.onload = async function () {
         try {
-          console.log("Fetching API key...");
-          const apiKeyResponse = await fetch(
-            `${config.getBaseUrl()}/get-api-key`,
-            {
-              method: "GET",
-              credentials: "include",
-              headers: {
-                Accept: "application/json",
-              },
-            }
-          );
-          if (!apiKeyResponse.ok) {
-            throw new Error(
-              `Failed to get API key: ${apiKeyResponse.status} ${apiKeyResponse.statusText}`
-            );
-          }
-          const { apiKey } = await apiKeyResponse.json();
-          console.log("Got API key successfully");
-
           console.log("Fetching all students for dropdown...");
           const response = await fetch(
             `${config.getBaseUrl()}/student/allstud`,
@@ -140,7 +121,6 @@
               credentials: "include",
               headers: {
                 Accept: "application/json",
-                "x-api-key": apiKey,
               },
             }
           );
