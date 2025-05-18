@@ -58,7 +58,7 @@
       </div>
 
       <div class="form-container">
-        <form id="updateForm">
+        <form id="updateForm" onsubmit="return updateStudentInfo(event)">
           <div class="mb-3">
             <label for="schoolId" class="form-label">School ID:</label>
             <input type="text" class="form-control" id="schoolId" required />
@@ -86,9 +86,8 @@
           </div>
           <div class="button-container d-grid gap-2">
             <button
-              type="button"
+              type="submit"
               class="btn btn-primary"
-              onclick="updateStudentInfo()"
             >
               Update Information
             </button>
@@ -128,20 +127,13 @@
           }
 
           // Populate form fields with the selected student's data
-          document.getElementById("schoolId").value =
-            selectedOption.data("schoolId") || "";
-          document.getElementById("name").value =
-            selectedOption.data("name") || "";
-          document.getElementById("address").value =
-            selectedOption.data("address") || "";
-          document.getElementById("emailAddress").value =
-            selectedOption.data("emailAddress") || "";
-          document.getElementById("course").value =
-            selectedOption.data("course") || "";
-          document.getElementById("address").value =
-            selectedOption.data("address") || "";
+          document.getElementById("schoolId").value = selectedOption.data("schoolId") || "";
+          document.getElementById("name").value = selectedOption.data("name") || "";
+          document.getElementById("address").value = selectedOption.data("address") || "";
+          document.getElementById("emailAddress").value = selectedOption.data("emailAddress") || "";
+          document.getElementById("course").value = selectedOption.data("course") || "";
         });
-      });
+        });
 
       // Load students into select dropdown when page loads
       window.onload = async function () {
@@ -198,7 +190,7 @@
       };
 
       async function updateStudentInfo(event) {
-        event.preventDefault();
+        if (event) event.preventDefault();
         const errorAlert = document.getElementById("errorAlert");
         const successAlert = document.getElementById("successAlert");
 
@@ -211,7 +203,8 @@
         };
 
         try {
-          const response = await fetch(`${config.getBaseUrl()}/student/updateinfo`, {
+          const studentId = document.getElementById("studentSelect").value;
+          const response = await fetch(`${config.getBaseUrl()}/student/${studentId}/info`, {
             method: "PUT",
             credentials: "include",
             headers: {
