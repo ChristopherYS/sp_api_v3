@@ -58,7 +58,7 @@
       </div>
 
       <div class="form-container">
-        <form id="updateForm">
+        <form id="updateForm" onsubmit="return updateSubjectInfo(event)">
           <div class="mb-3">
             <label for="subjectCode" class="form-label">Subject Code:</label>
             <input type="text" class="form-control" id="subjectCode" required />
@@ -111,9 +111,8 @@
           </div>
           <div class="button-container d-grid gap-2">
             <button
-              type="button"
+              type="submit"
               class="btn btn-primary"
-              onclick="updateSubject()"
             >
               Update Information
             </button>
@@ -135,6 +134,10 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="config.js"></script>
     <script>
+      // Store loaded subjects globally
+      window._subjectsList = [];
+    </script>
+    <script>
       // Initialize Select2 for subject dropdown
       $(document).ready(function () {
         $("#subjectSelect").select2({
@@ -143,6 +146,32 @@
           allowClear: true,
           width: "100%",
         });
+      });
+
+      // Populate form fields when a subject is selected
+      $("#subjectSelect").on("change", function () {
+        const subjectId = $(this).val();
+        const subjects = window._subjectsList || [];
+        if (!subjectId) {
+          document.getElementById("updateForm").reset();
+          return;
+        }
+        // Find the selected subject's data from the loaded list
+        var subject = null;
+        for (var i = 0; i < subjects.length; i++) {
+          if (String(subjects[i].id) === String(subjectId)) {
+            subject = subjects[i];
+            break;
+          }
+        }
+        if (subject) {
+          document.getElementById("subjectCode").value = subject.subject_code || "";
+          document.getElementById("subjectName").value = subject.subject_name || "";
+          document.getElementById("subjectUnits").value = subject.subject_units || "";
+          document.getElementById("subjectCourse").value = subject.subject_course || "";
+          document.getElementById("subjectStudentYear").value = subject.subject_studentyear || "";
+          document.getElementById("subjectStudentSemester").value = subject.subject_studentsemester || "";
+        }
       });
 
       // Load subjects into select dropdown when page loads
@@ -172,6 +201,9 @@
           // Sort subjects by name
           subjects.sort((a, b) => a.subject_name.localeCompare(b.subject_name));
 
+          // Store subjects globally for change event access
+          window._subjectsList = subjects;
+
           subjects.forEach((subject) => {
             const option = new Option(
               `${subject.subject_name} (${subject.subject_code})`,
@@ -196,6 +228,10 @@
         const subjectId = document.getElementById("subjectSelect").value;
         const subjectName = document.getElementById("subjectName").value;
         const subjectCode = document.getElementById("subjectCode").value;
+        const subjectUnits = document.getElementById("subjectUnits").value;
+        const subjectCourse = document.getElementById("subjectCourse").value;
+        const subjectStudentYear = document.getElementById("subjectStudentYear").value;
+        const subjectStudentSemester = document.getElementById("subjectStudentSemester").value;
         const errorAlert = document.getElementById("errorAlert");
         const successAlert = document.getElementById("successAlert");
 
@@ -217,9 +253,33 @@
           return;
         }
 
+        if (!subjectUnits) {
+          errorAlert.textContent = "Please enter subject units.";
+          errorAlert.style.display = "block";
+          return;
+        }
+
+        if (!subjectCourse) {
+          errorAlert.textContent = "Please enter subject course.";
+          errorAlert.style.display = "block";
+          return;
+        }
+
+        if (!subjectStudentYear) {
+          errorAlert.textContent = "Please enter student year.";
+          errorAlert.style.display = "block";
+          return;
+        }
+
+        if (!subjectStudentSemester) {
+          errorAlert.textContent = "Please enter student semester.";
+          errorAlert.style.display = "block";
+          return;
+        }
+
         try {
           const response = await fetch(
-            `${config.getBaseUrl()}/subject/updatesub`,
+            `${config.getBaseUrl()}/subject/${subjectId}`,
             {
               method: "PUT",
               credentials: "include",
@@ -228,9 +288,12 @@
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
-                id: subjectId,
                 subject_name: subjectName,
                 subject_code: subjectCode,
+                subject_units: subjectUnits,
+                subject_course: subjectCourse,
+                subject_studentyear: subjectStudentYear,
+                subject_studentsemester: subjectStudentSemester,
               }),
             }
           );

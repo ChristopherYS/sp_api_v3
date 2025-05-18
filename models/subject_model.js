@@ -36,31 +36,31 @@ export const createSubject = (subjectData) => {
 
 // Get all subjects
 export const getAllSubjects = async () => {
-  const db = await initializeDatabase();
+  const db = initializeDatabase();
   try {
     const stmt = db.prepare("SELECT * FROM subject");
     const subjects = stmt.all();
     return subjects;
   } finally {
-    await db.close();
+    db.close();
   }
 };
 
 // Get a subject by ID
 export const getSubjectById = async (id) => {
-  const db = await initializeDatabase();
+  const db = initializeDatabase();
   try {
     const stmt = db.prepare("SELECT * FROM subject WHERE id = ?");
     const subject = stmt.get(id);
     return subject;
   } finally {
-    await db.close();
+    db.close();
   }
 };
 
 // Update subject information
 export const updateSubject = async (id, subjectData) => {
-  const db = await initializeDatabase();
+  const db = initializeDatabase();
   try {
     const {
       subject_code,
@@ -70,21 +70,21 @@ export const updateSubject = async (id, subjectData) => {
       subject_studentyear,
       subject_studentsemester,
     } = subjectData;
-    const result = await db.run(
-      "UPDATE subject SET subject_code = ?, subject_name = ?, subject_units = ?, subject_course = ?, subject_studentyear = ?, subject_studentsemester = ? WHERE id = ?",
-      [
-        subject_code,
-        subject_name,
-        subject_units,
-        subject_course,
-        subject_studentyear,
-        subject_studentsemester,
-        id,
-      ]
+    const stmt = db.prepare(
+      "UPDATE subject SET subject_code = ?, subject_name = ?, subject_units = ?, subject_course = ?, subject_studentyear = ?, subject_studentsemester = ? WHERE id = ?"
+    );
+    const result = stmt.run(
+      subject_code,
+      subject_name,
+      subject_units,
+      subject_course,
+      subject_studentyear,
+      subject_studentsemester,
+      id
     );
     return result;
   } finally {
-    await db.close();
+    db.close();
   }
 };
 
