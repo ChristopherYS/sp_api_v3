@@ -90,12 +90,13 @@ export const updateSubject = async (id, subjectData) => {
 
 // Delete a subject
 export const deleteSubject = async (id) => {
-  const db = await initializeDatabase();
+  const db = initializeDatabase();
   try {
-    const result = await db.run("DELETE FROM subject WHERE id = ?", [id]);
+    const stmt = db.prepare("DELETE FROM subject WHERE id = ?");
+    const result = stmt.run(id);
     return result;
   } finally {
-    await db.close();
+    db.close();
   }
 };
 
@@ -138,21 +139,19 @@ export const updateStudentGrade = async (
 
 // Delete student grades
 export const deleteStudentGrade = async (student_id, subject_id) => {
-  const db = await initializeDatabase();
+  const db = initializeDatabase();
   try {
-    const result = await db.run(
-      "DELETE FROM student_subject_grades WHERE student_id = ? AND subject_id = ?",
-      [student_id, subject_id]
-    );
+    const stmt = db.prepare("DELETE FROM student_subject_grades WHERE student_id = ? AND subject_id = ?");
+    const result = stmt.run(student_id, subject_id);
     return result;
   } finally {
-    await db.close();
+    db.close();
   }
 };
 
 // View student grades
 export const getStudentGrades = async (studentId) => {
-  const db = await initializeDatabase();
+  const db = initializeDatabase();
   try {
     const stmt = db.prepare(
       'SELECT s.id, s.subject_studentyear AS "Year Level", s.subject_studentsemester AS "Semester", s.subject_code AS "Subject Code", s.subject_name AS "Subject Name", s.subject_units AS "Subject Units", g.subject_grades AS "Subject Grades" FROM student_subject_grades g INNER JOIN subject s ON g.subject_id = s.id WHERE g.student_id = ?'
@@ -160,6 +159,6 @@ export const getStudentGrades = async (studentId) => {
     const grades = stmt.all(studentId);
     return grades;
   } finally {
-    await db.close();
+    db.close();
   }
 };

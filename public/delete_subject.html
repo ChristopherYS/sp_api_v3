@@ -58,12 +58,11 @@
       </div>
 
       <div class="form-container">
-        <form id="deleteForm">
+        <form id="deleteForm" onsubmit="deleteSubject(event)">
           <div class="button-container d-grid gap-2">
             <button
-              type="button"
+              type="submit"
               class="btn btn-danger"
-              onclick="deleteSubject()"
             >
               Delete Subject
             </button>
@@ -99,7 +98,7 @@
       window.onload = async function () {
         try {
           console.log("Fetching all subjects...");
-          const response = await fetch(`${config.getBaseUrl()}/api/subject/allsub`, {
+          const response = await fetch(`${config.getBaseUrl()}/subject/allsub`, {
             method: "GET",
             credentials: "include",
             headers: {
@@ -139,25 +138,33 @@
       };
 
       async function deleteSubject(event) {
-        event.preventDefault();
+        if (event) event.preventDefault();
         const errorAlert = document.getElementById("errorAlert");
         const successAlert = document.getElementById("successAlert");
 
-        const subjectCode = document.getElementById("subjectCode").value;
+        const subjectSelect = document.getElementById("subjectSelect");
+        const subjectId = subjectSelect.value;
+
+        if (!subjectId) {
+          errorAlert.textContent = "Please select a subject to delete.";
+          errorAlert.style.display = "block";
+          successAlert.style.display = "none";
+          return;
+        }
 
         if (!confirm("Are you sure you want to delete this subject? This action cannot be undone.")) {
           return;
         }
 
         try {
-          const response = await fetch(`${config.getBaseUrl()}/subject/delete`, {
+          const response = await fetch(`${config.getBaseUrl()}/subject/delsub`, {
             method: "DELETE",
             credentials: "include",
             headers: {
               "Content-Type": "application/json",
               Accept: "application/json",
             },
-            body: JSON.stringify({ subject_code: subjectCode }),
+            body: JSON.stringify({ id: subjectId }),
           });
 
           if (!response.ok) {
