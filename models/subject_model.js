@@ -168,10 +168,10 @@ export const deleteStudentGrade = async (student_id, subject_id) => {
 export const getStudentGrades = async (studentId) => {
   const db = await initializeDatabase();
   try {
-    const grades = await db.all(
-      'SELECT s.id, s.subject_studentyear AS "Year Level", s.subject_studentsemester AS "Semester", s.subject_code AS "Subject Code", s.subject_name AS "Subject Name", s.subject_units AS "Subject Units", g.subject_grades AS "Subject Grades" FROM student_subject_grades g INNER JOIN subject s ON g.subject_id = s.id WHERE g.student_id = ?',
-      [studentId]
+    const stmt = db.prepare(
+      'SELECT s.id, s.subject_studentyear AS "Year Level", s.subject_studentsemester AS "Semester", s.subject_code AS "Subject Code", s.subject_name AS "Subject Name", s.subject_units AS "Subject Units", g.subject_grades AS "Subject Grades" FROM student_subject_grades g INNER JOIN subject s ON g.subject_id = s.id WHERE g.student_id = ?'
     );
+    const grades = stmt.all(studentId);
     return grades;
   } finally {
     await db.close();
