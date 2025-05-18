@@ -1,6 +1,60 @@
 # Student Profile API
 
+
 A RESTful API for managing student profiles, subjects, grades, and registrar information. The project includes a web frontend (Bootstrap 5 + DataTables) and a Node.js/Express.js backend with SQLite for persistent storage.
+
+## Getting Started
+
+### Prerequisites
+- [Node.js 18.x](https://nodejs.org/)
+- [npm](https://www.npmjs.com/)
+
+### Installation
+```bash
+git clone <repo-url>
+cd sp_api_v3
+npm install
+```
+
+### Environment Variables
+Create a `.env` file in the root directory with the following content:
+```env
+API_KEY=your_api_key_here
+PORT=3000
+```
+Replace `your_api_key_here` with your desired API key (default: `b102r224s327`).
+
+### Running the Server
+```bash
+npm start
+# or for development with auto-reload
+npm run dev
+```
+
+The API will be available at `http://localhost:3000` by default.
+
+## Authentication
+Most endpoints require an API key. Include it in the `x-api-key` header of your requests:
+
+```http
+GET /student/allstud HTTP/1.1
+Host: localhost:3000
+x-api-key: your_api_key_here
+```
+
+**Example with curl:**
+```bash
+curl -H "x-api-key: your_api_key_here" http://localhost:3000/student/allstud
+```
+
+
+## API Documentation & Testing
+
+- The web UI at [`/public/index.html`](public/index.html) provides a browsable overview of all endpoints.
+- A ready-to-use [Postman collection](StudentProfileAPI.postman_collection.json) is included for testing all endpoints.
+- **Note:** If you are running the project locally, update the `getBaseUrl` value in [`public/config.js`](public/config.js) to `http://localhost:3000` for the frontend to work correctly with your local backend.
+
+## Features
 
 ## Features
 - Registrar and student authentication
@@ -13,14 +67,29 @@ A RESTful API for managing student profiles, subjects, grades, and registrar inf
 - CORS support for cross-origin requests
 
 ## Technologies Used
-- **Node.js** (JavaScript runtime for backend server)
-- **Express.js** (Web framework for Node.js)
-- **SQLite** (with `sqlite3` and `sqlite` npm packages)
-- **bcrypt** (for password hashing)
-- **cors** (for CORS support)
-- **dotenv** (for environment variables)
-- **Bootstrap 5** (frontend UI)
-- **DataTables** (frontend table display)
+- **Node.js** — Backend JavaScript runtime environment
+- **Express.js** — Fast, minimalist web server framework for Node.js
+- **SQLite** — Lightweight SQL database engine (accessed via `better-sqlite3`)
+- **bcrypt** — Library for secure password hashing
+- **cors** — Middleware for enabling Cross-Origin Resource Sharing
+- **dotenv** — Loads environment variables from `.env` files
+- **Bootstrap 5** — CSS framework for responsive web design
+- **DataTables** — jQuery plugin for advanced HTML table features
+
+## Example API Usage
+
+**Create a new student:**
+```bash
+curl -X POST http://localhost:3000/student/newstud \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: your_api_key_here" \
+  -d '{"name":"John Doe","school_id":"2025001","address":"123 Main St","email_address":"john@example.com","username":"johndoe","password":"password123","course":"BSCS"}'
+```
+
+**Get all subjects:**
+```bash
+curl -H "x-api-key: your_api_key_here" http://localhost:3000/subject/allsub
+```
 
 ## API Endpoints
 
@@ -106,6 +175,7 @@ public/                                 # Static frontend files (HTML, CSS, JS)
   update_student_username.html
   update_subject_info.html
   view_student_grades.html
+  config.js                             # Frontend config (update getBaseUrl for local use)
 
 routes/                                 # Express route definitions
   registrar_routes.js
@@ -116,5 +186,3 @@ routes/                                 # Express route definitions
 ---
 
 **Authors:** Christopher Sembrano, Joshua Repique, Bea Verna Barañao
-
-**License:** ISC
