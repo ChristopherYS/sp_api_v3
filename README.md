@@ -17,12 +17,12 @@ npm install
 ```
 
 ### Environment Variables
-Create a `.env` file in the root directory with the following content:
+Create a `.env` file in the root directory with the following content if it doesnt exist:
 ```env
 API_KEY=your_api_key_here
 PORT=3000
 ```
-Replace `your_api_key_here` with your desired API key (default: `b102r224s327`).
+Replace `your_api_key_here` with your desired API key.
 
 ### Running the Server
 ```bash
@@ -37,7 +37,7 @@ The API will be available at `http://localhost:3000` by default.
 Most endpoints require an API key. Include it in the `x-api-key` header of your requests:
 
 ```http
-GET /student/allstud HTTP/1.1
+GET /student/allstud
 Host: localhost:3000
 x-api-key: your_api_key_here
 ```
@@ -51,10 +51,8 @@ curl -H "x-api-key: your_api_key_here" http://localhost:3000/student/allstud
 ## API Documentation & Testing
 
 - The web UI at [`/public/index.html`](public/index.html) provides a browsable overview of all endpoints.
-- A ready-to-use [Postman collection](StudentProfileAPI.postman_collection.json) is included for testing all endpoints.
 - **Note:** If you are running the project locally, update the `getBaseUrl` value in [`public/config.js`](public/config.js) to `http://localhost:3000` for the frontend to work correctly with your local backend.
 
-## Features
 
 ## Features
 - Registrar and student authentication
