@@ -11,7 +11,7 @@ A RESTful API for managing student profiles, subjects, grades, and registrar inf
 
 ### Installation
 ```bash
-git clone <repo-url>
+git clone https://github.com/ChristopherYS/sp_api_v3.git
 cd sp_api_v3
 npm install
 ```
@@ -27,11 +27,11 @@ Replace `your_api_key_here` with your desired API key.
 ### Running the Server
 ```bash
 npm start
-# or for development with auto-reload
+```
+# Or for development with auto-reload
+```bash
 npm run dev
 ```
-
-The API will be available at `http://localhost:3000` by default.
 
 ## Authentication
 Most endpoints require an API key. Include it in the `x-api-key` header of your requests:
@@ -128,7 +128,6 @@ curl -H "x-api-key: your_api_key_here" http://localhost:3000/subject/allsub
 app.js                                  # Main Express app
 package.json                            # Project metadata and dependencies
 student_profile.db                      # SQLite database file
-.gitignore                              # Git ignored files and folders
 
 controllers/                            # Route handler logic
   registrar_controller.js
@@ -173,7 +172,7 @@ public/                                 # Static frontend files (HTML, CSS, JS)
   update_student_username.html
   update_subject_info.html
   view_student_grades.html
-  config.js                             # Frontend config (update getBaseUrl for local use)
+  config.js                             # Frontend config (update getBaseUrl for local or deployment use)
 
 routes/                                 # Express route definitions
   registrar_routes.js
@@ -183,4 +182,4 @@ routes/                                 # Express route definitions
 
 ---
 
-**Authors:** Christopher Sembrano, Joshua Repique, Bea Verna Barañao
+**Authors:** Bea Verna Barañao, Joshua Repique, Christopher Sembrano
