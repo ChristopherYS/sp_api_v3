@@ -3,8 +3,8 @@
 import initializeDatabase from "../db/database.js";
 
 // Create a new subject
-export const createSubject = async (subjectData) => {
-  const db = await initializeDatabase();
+export const createSubject = (subjectData) => {
+  const db = initializeDatabase();
   try {
     const {
       subject_code,
@@ -14,26 +14,23 @@ export const createSubject = async (subjectData) => {
       subject_studentyear,
       subject_studentsemester,
     } = subjectData;
-    const result = await db.run(
-      "INSERT INTO subject (subject_code, subject_name, subject_units, subject_course, subject_studentyear, subject_studentsemester) VALUES (?, ?, ?, ?, ?, ?)",
-      [
-        subject_code,
-        subject_name,
-        subject_units,
-        subject_course,
-        subject_studentyear,
-        subject_studentsemester,
-      ]
+    const stmt = db.prepare(
+      "INSERT INTO subject (subject_code, subject_name, subject_units, subject_course, subject_studentyear, subject_studentsemester) VALUES (?, ?, ?, ?, ?, ?)"
+    );
+    const result = stmt.run(
+      subject_code,
+      subject_name,
+      subject_units,
+      subject_course,
+      subject_studentyear,
+      subject_studentsemester
     );
 
     // Get the created subject
-    const createdSubject = await db.get("SELECT * FROM subject WHERE id = ?", [
-      result.lastID,
-    ]);
-
+    const createdSubject = db.prepare("SELECT * FROM subject WHERE id = ?").get(result.lastInsertRowid);
     return createdSubject;
   } finally {
-    await db.close();
+    db.close();
   }
 };
 

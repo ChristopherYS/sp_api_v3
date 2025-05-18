@@ -2,8 +2,8 @@
 
 import Database from "better-sqlite3";
 
-// Database connection initialization function
-const initializeDatabase = async () => {
+// Database connection initialization function (sync, not async)
+const initializeDatabase = () => {
   try {
     const db = new Database("./student_profile.db", { verbose: console.log });
     console.log("Database connected successfully");

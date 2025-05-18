@@ -133,11 +133,8 @@
           subject_name: document.getElementById("subject_name").value,
           subject_units: document.getElementById("subject_units").value,
           subject_course: document.getElementById("subject_course").value,
-          subject_studentyear: document.getElementById("subject_studentyear")
-            .value,
-          subject_studentsemester: document.getElementById(
-            "subject_studentsemester"
-          ).value,
+          subject_studentyear: document.getElementById("subject_studentyear").value,
+          subject_studentsemester: document.getElementById("subject_studentsemester").value,
         };
 
         try {
@@ -146,7 +143,7 @@
             credentials: "include",
             headers: {
               "Content-Type": "application/json",
-              Accept: "application/json",
+              Accept: "application/json"
             },
             body: JSON.stringify(formData),
           });
