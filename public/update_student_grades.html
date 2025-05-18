@@ -65,7 +65,7 @@
       </div>
 
       <div class="form-container">
-        <form id="updateForm">
+        <form id="updateForm" onsubmit="updateGrade(event)">
           <div class="mb-3">
             <label for="grade" class="form-label">Grade:</label>
             <input
@@ -80,9 +80,8 @@
           </div>
           <div class="button-container d-grid gap-2">
             <button
-              type="button"
+              type="submit"
               class="btn btn-primary"
-              onclick="updateGrade()"
             >
               Update Grade
             </button>
@@ -119,12 +118,23 @@
           allowClear: true,
           width: "100%",
         });
+
+        // Enable/disable subjectSelect based on student selection
+        $("#studentSelect").on("change", function () {
+          if ($(this).val()) {
+            $("#subjectSelect").prop("disabled", false);
+          } else {
+            $("#subjectSelect").prop("disabled", true);
+            $("#subjectSelect").val("").trigger("change");
+          }
+        });
       });
 
-      // Load students into select dropdown when page loads
+      // Load students into select dropdown
       window.onload = async function () {
+        $("#subjectSelect").prop("disabled", true);
         try {
-          console.log("Fetching all students...");
+          // Fetch all students for the dropdown
           const response = await fetch(
             `${config.getBaseUrl()}/student/allstud`,
             {
@@ -159,11 +169,29 @@
           });
 
           select.trigger("change");
+        } catch (error) {
+          console.error("Error loading students:", error);
+          const errorAlert = document.getElementById("errorAlert");
+          errorAlert.textContent = `Failed to load students: ${error.message}. Please refresh the page.`;
+          errorAlert.style.display = "block";
+        }
+      };
 
-          // Fetch subjects
-          console.log("Fetching all subjects...");
-          const subjectResponse = await fetch(
-            `${config.getBaseUrl()}/subject/allsub`,
+      // fetch only the subjects that student has grades for
+      $("#studentSelect").on("change", async function () {
+        const studentId = $(this).val();
+        const subjectSelect = $("#subjectSelect");
+        subjectSelect.empty();
+        subjectSelect.append('<option value="">Choose a subject...</option>');
+        if (!studentId) {
+          subjectSelect.prop("disabled", true);
+          subjectSelect.trigger("change");
+          return;
+        }
+        try {
+          // Fetch grades for the selected student
+          const response = await fetch(
+            `${config.getBaseUrl()}/subject/studgrades/${studentId}`,
             {
               method: "GET",
               credentials: "include",
@@ -172,37 +200,30 @@
               },
             }
           );
-
-          if (!subjectResponse.ok) {
-            throw new Error(
-              `Failed to fetch subjects: ${subjectResponse.status} ${subjectResponse.statusText}`
-            );
+          if (!response.ok) {
+            throw new Error(`Failed to fetch student grades: ${response.status} ${response.statusText}`);
           }
-
-          const subjects = await subjectResponse.json();
-          const subjectSelect = $("#subjectSelect");
-
-          // Sort subjects by name
-          subjects.sort((a, b) => a.subject_name.localeCompare(b.subject_name));
-
-          subjects.forEach((subject) => {
+          const grades = await response.json();
+          // grades is an array of objects with subject info and grade
+          grades.forEach((row) => {
             const option = new Option(
-              `${subject.subject_name} (${subject.subject_code})`,
-              subject.id,
+              `${row['Subject Name']} (${row['Subject Code']}) - Grade: ${row['Subject Grades']}`,
+              row.id,
               false,
               false
             );
             subjectSelect.append(option);
           });
-
+          subjectSelect.prop("disabled", false);
           subjectSelect.trigger("change");
         } catch (error) {
-          console.error("Error loading data:", error);
+          console.error("Error loading subjects for student:", error);
           const errorAlert = document.getElementById("errorAlert");
-          errorAlert.textContent = `Failed to load data: ${error.message}. Please refresh the page.`;
+          errorAlert.textContent = `Failed to load subjects for student: ${error.message}`;
           errorAlert.style.display = "block";
+          subjectSelect.prop("disabled", true);
         }
-      };
+      });
 
       async function updateGrade(event) {
         event.preventDefault();
@@ -232,18 +253,18 @@
 
         try {
           const response = await fetch(
-            `${config.getBaseUrl()}/subject/updategrade`,
+            `${config.getBaseUrl()}/subject/updatestudgrades`,
             {
-              method: "PUT",
+              method: "PATCH",
               credentials: "include",
               headers: {
                 Accept: "application/json",
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
+                subject_grades: newGrade,
                 student_id: studentId,
                 subject_id: subjectId,
-                grade: newGrade,
               }),
             }
           );
