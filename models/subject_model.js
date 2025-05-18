@@ -100,20 +100,16 @@ export const deleteSubject = async (id) => {
 };
 
 // Add student grades
-export const addStudentGrade = async (
-  student_id,
-  subject_id,
-  subject_grades
-) => {
-  const db = await initializeDatabase();
+export const addStudentGrade = (student_id, subject_id, subject_grades) => {
+  const db = initializeDatabase();
   try {
-    const result = await db.run(
-      "INSERT INTO student_subject_grades (student_id, subject_id, subject_grades) VALUES (?, ?, ?)",
-      [student_id, subject_id, subject_grades]
+    const stmt = db.prepare(
+      "INSERT INTO student_subject_grades (student_id, subject_id, subject_grades) VALUES (?, ?, ?)"
     );
+    const result = stmt.run(student_id, subject_id, subject_grades);
     return result;
   } finally {
-    await db.close();
+    db.close();
   }
 };
 
