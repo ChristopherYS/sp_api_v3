@@ -168,7 +168,7 @@
 
         try {
           const response = await fetch(
-            `${config.getBaseUrl()}/registrar/updateusername`,
+            `${config.getBaseUrl()}/registrar/${registrarId}/username`,
             {
               method: "PUT",
               credentials: "include",
@@ -177,7 +177,6 @@
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
-                id: registrarId,
                 username: newUsername,
               }),
             }
