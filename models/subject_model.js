@@ -119,19 +119,12 @@ export const updateStudentGrade = async (
   student_id,
   subject_id
 ) => {
-  const db = await initializeDatabase();
+  const db = initializeDatabase();
   try {
-    const result = await db.run(
-      "UPDATE student_subject_grades SET subject_grades = ? WHERE student_id = ? AND subject_id = ?",
-      [subject_grades, student_id, subject_id]
+    const stmt = db.prepare(
+      "UPDATE student_subject_grades SET subject_grades = ? WHERE student_id = ? AND subject_id = ?"
     );
-    console.log(
-      "Executing SQL Query:",
-      "UPDATE student_subject_grades SET subject_grades = ? WHERE student_id = ? AND subject_id = ?",
-      [subject_grades, student_id, subject_id]
-    );
-    console.log("Parameters:", { subject_grades, student_id, subject_id });
-    console.log("Result:", result);
+    const result = stmt.run(subject_grades, student_id, subject_id);
     if (result.changes === 0) {
       throw new Error(
         "No rows updated. Ensure the student_id and subject_id exist."
@@ -139,7 +132,7 @@ export const updateStudentGrade = async (
     }
     return result;
   } finally {
-    await db.close();
+    db.close();
   }
 };
 
