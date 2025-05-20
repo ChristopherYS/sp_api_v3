@@ -28,7 +28,7 @@ Replace `your_api_key_here` with your desired API key.
 ```bash
 npm start
 ```
-# Or for development with auto-reload
+### Or for development with auto-reload
 ```bash
 npm run dev
 ```
